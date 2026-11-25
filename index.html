@@ -231,36 +231,10 @@ function loop(t){requestAnimationFrame(loop);const dt=Math.min(.05,(t-last)/1e3)
   cam.rotation.set(pit,yaw,0);
   lamp.intensity=(lit?2.4:.8)*(S.oil>0?1:.35);lamp.distance=lit?24:14;FL.forEach((q,i)=>{const k=1+Math.sin(t*.02+i*3)*.12+Math.random()*.1;q.l.intensity=1.5*k;q.f.scale.set(1,k,1)});if(A.dust)A.dust.rotation.y+=dt*.03;wtex.offset.set(t*.00003,t*.00002);wat.material.emissiveIntensity=.7+Math.sin(t*.002)*.2;sock.forEach((m,i)=>m.material.emissiveIntensity=i<S.sig?2.5:.1);beam.intensity=lit?5:0;cone.visible=lit;lm.emissiveIntensity=lit?2.2+Math.random()*.4:.7+Math.random()*.15;lan.rotation.z=Math.sin(t*.004)*.05;lamp.color.setHex(lit?0xffb060:0xff8a40);lamp.intensity*=.95+Math.random()*.1;
   swt=Math.max(0,swt-dt);const w=WP[S.wep],swd=Math.max(.2,w.t=='r'?.15:w.cd),q=1-Math.min(1,swt/swd);
-const clamp01=v=>Math.max(0,Math.min(1,v)),ease=v=>{v=clamp01(v);return v*v*(3-2*v)};
-let tx=.32,ty=-.3,tz=-.55,rx=0,ry=0,rz=0;const bob=(mx||mz)?1:0,ph=t*.009;
-tx+=Math.sin(ph)*.012*bob;ty+=Math.abs(Math.cos(ph))*.015*bob+Math.sin(t*.0018)*.006;
-const dy=Math.max(-.3,Math.min(.3,yaw-ly)),dp=Math.max(-.3,Math.min(.3,pit-lp));ly=yaw;lp=pit;
-tx-=dy*.6;ty+=dp*.6;ry-=dy*.8;rx+=dp*.5;
-// A little wrist lag and counter-sway keeps the weapon attached to a living arm.
-const idleSway=Math.sin(t*.0017)*.009,idleDrift=Math.sin(t*.0023+.8)*.006;
-tx+=idleSway;ty+=idleDrift;rz-=idleSway*.7;
-if(swt>0){
- const wind=1-ease(q/.2),strike=ease((q-.16)/.22)*(1-ease((q-.38)/.22));
- const follow=ease((q-.38)/.3)*(1-ease((q-.68)/.22)),recover=ease((q-.68)/.32);
- const pulse=Math.sin(Math.PI*clamp01((q-.16)/.62));
- if(w.t=='r'){
-  tz+=wind*.09-strike*.12+follow*.035;rx+=wind*.16-strike*.28+follow*.1;
-  ry+=Math.sin(q*Math.PI)*.035;rz+=strike*.045;
- }else{
-  const side=swStyle==1?-1:1,heavy=w.cd>.8?1.18:1;
-  // Draw the weapon back, accelerate through the arc, then let the wrist settle.
-  tx+=wind*.075-heavy*strike*.24+follow*.09;
-  ty+=wind*.035+strike*.035-follow*.045;
-  tz+=wind*.12-strike*.2+follow*.08;
-  if(swStyle==0){ry+=wind*-.24+strike*.92*side-follow*.2;rz+=wind*-.18+strike*.42-follow*.16;rx+=strike*.16-follow*.08}
-  else if(swStyle==1){ry+=wind*.2-strike*.9*side+follow*.18;rz+=wind*.16-strike*.4+follow*.14;rx-=strike*.12}
-  else if(swStyle==2){ry+=wind*-.12+strike*.28;rx+=wind*.18-strike*.78+follow*.22;rz-=strike*.22}
-  else{ry+=wind*-.3+strike*1.35;rx+=wind*.22-strike*.95+follow*.28;rz+=strike*.3-follow*.2}
-  // Recovery eases back to neutral instead of snapping at the end of the cooldown.
-  tx+=recover*.012*Math.sin(q*18);ry+=recover*.025*Math.sin(q*14);rz+=recover*.018*Math.sin(q*16);
-  ty+=pulse*.012;
- }
-}
+let tx=.32,ty=-.3,tz=-.55,rx=0,ry=0,rz=0;const bob=(mx||mz)?1:0,ph=t*.009;tx+=Math.sin(ph)*.012*bob;ty+=Math.abs(Math.cos(ph))*.015*bob+Math.sin(t*.0018)*.006;
+const dy=Math.max(-.3,Math.min(.3,yaw-ly)),dp=Math.max(-.3,Math.min(.3,pit-lp));ly=yaw;lp=pit;tx-=dy*.6;ty+=dp*.6;ry-=dy*.8;rx+=dp*.5;
+if(swt>0){const u=Math.min(1,Math.max(0,(q-.12)/.58)),ea=1-Math.pow(1-u,3),f=-1+2*ea-(q<.22?Math.sin(q/.22*Math.PI)*.3:0),rec=q>.72?Math.pow((q-.72)/.28,2):0,k=1-rec,ev=Math.sin(q*Math.PI);
+if(w.t=='r'){tz+=ev*.14;rx+=ev*.35}else if(swStyle==0){tx+=-f*.4*k;ry=f*k;rz=f*.5*k}else if(swStyle==1){tx+=(f*.4-.1)*k;ry=-f*k;rz=-f*.5*k}else if(swStyle==2){tx-=.2*k;ty+=-f*.25*k;rx=-f*k}else{tz-=ev*.3;ty+=ev*.1;rx=f*1.1*k;ry=f*2.2*k}}
 const sm=1-Math.exp(-dt*20);PS.x+=(tx-PS.x)*sm;PS.y+=(ty-PS.y)*sm;PS.z+=(tz-PS.z)*sm;PS.rx+=(rx-PS.rx)*sm;PS.ry+=(ry-PS.ry)*sm;PS.rz+=(rz-PS.rz)*sm;wm.position.set(PS.x,PS.y,PS.z);wm.rotation.set(PS.rx,PS.ry,PS.rz);
   for(const p of A.p.slice()){p.o.rotation.y+=dt*2;p.o.position.y=1+Math.sin(t*.003+p.x)*.15;
    if(Math.hypot(P.x-p.o.position.x,P.z-p.o.position.z)<1.8){if(p.t=='oil'){S.fl++;toast('Oil flask stored (press F)')}else if(p.t=='hp'){S.sv++;toast('Healing salve stored (press H)')}else if(p.t=='key'){S.keys++;toast('You found the gate key')}else{S.sig++;toast('Ward sigil ('+S.sig+'/3)')}
