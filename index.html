@@ -52,7 +52,7 @@ crossbow:{n:'Hush Crossbow',d:2.7,r:0,cd:.9,t:'r',c:0x886644,len:.6,x:10,u:2,des
 hammer:{n:'Bellkeeper Hammer',d:4.2,r:3.2,cd:1.1,t:'m',c:0x8888aa,len:.9,x:14,u:3,desc:'Slow and crushing.'},
 vorpal:{n:'Dawnblade',d:5.5,r:3.6,cd:.55,t:'m',c:0xffe080,len:1.2,x:20,req:'steel',u:4,desc:'Blazing fast blade.'},
 storm:{n:'Stormcaster',d:4.8,r:0,cd:1,t:'r',c:0x66aaff,len:.8,spl:4.5,x:28,u:5,desc:'Lightning orb that detonates wide. Uses ammo.'}};
-let combo=0,comboT=0,swStyle=0,PS={x:.32,y:-.3,z:-.55,rx:0,ry:0,rz:0},ly=0,lp=0,A=null,areas={},yaw=0,pit=0,P=cam.position,cdn=0,swt=0,projs=[],lit=false,keys={};
+let combo=0,comboT=0,swStyle=0,swingJitter=0,gaitPhase=0,moveLean=0,stumble=0,lastMx=0,lastMz=0,PS={x:.32,y:-.3,z:-.55,rx:0,ry:0,rz:0},ly=0,lp=0,A=null,areas={},yaw=0,pit=0,P=cam.position,cdn=0,swt=0,projs=[],lit=false,keys={};
 const eyeM=new T.MeshBasicMaterial({color:0xff2a2a});
 function mk(name,col,fog,sky){const g=new T.Group();g.visible=false;sc.add(g);
  const a={name,g,b:[],e:[],p:[],fog,sky,col};const m=new T.MeshStandardMaterial({map:tex,bumpMap:tex,bumpScale:2,color:col,roughness:.9});
@@ -163,7 +163,7 @@ function attack(){const w=WP[S.wep];if(cdn>0||S.over)return;
  if(w.t=='r'){if(S.ammo<=0){toast('Out of ammo. Buy more in the armory.',1200);return}S.ammo--;cdn=w.cd;if(comboT<=0)combo=0;const cbr=combo;swStyle=cbr;const rm=cbr==3?2.2:1;
   const o=new T.Mesh(new T.SphereGeometry(S.wep=='launch'?.2:.1,8,8),new T.MeshBasicMaterial({color:S.wep=='launch'?0xff6020:0xccbb88}));o.position.copy(P);const d=new T.Vector3(-Math.sin(yaw)*Math.cos(pit),Math.sin(pit),-Math.cos(yaw)*Math.cos(pit));
   A.g.add(o);o.scale.setScalar(rm>1?2.2:1);projs.push({o,d,life:2,w,m:rm});if(cbr==3)toast('FINISHER!',500);swt=.15;return}
- cdn=w.cd;swt=w.cd;if(comboT<=0)combo=0;const cb=combo,fin=cb==3;swStyle=cb;const mul=fin?2.2:1+cb*.15;let hitAny=false;const fx=-Math.sin(yaw),fz=-Math.cos(yaw);
+ cdn=w.cd;swt=w.cd;if(comboT<=0)combo=0;const cb=combo,fin=cb==3;swStyle=cb;swingJitter=(Math.random()-.5)*.34;const mul=fin?2.2:1+cb*.15;let hitAny=false;const fx=-Math.sin(yaw),fz=-Math.cos(yaw);
  A.e.slice().forEach(e=>{const dx=e.o.position.x-P.x,dz=e.o.position.z-P.z,d=Math.hypot(dx,dz);if(d<w.r*(fin?1.3:1)+(e.boss?1:0)&&(dx*fx+dz*fz)/d>(fin?-.2:.25)){hurt(e,w.d*mul);hitAny=true}});if(hitAny){combo=(cb+1)%4;comboT=1.4;if(fin)toast('FINISHER!',500)}else combo=0}
 function interact(){if(S.paused)return;const near=(x,z,r)=>Math.hypot(P.x-x,P.z-z)<r;
  if(A.name=='tow'&&near(0,-11,3.5)){if(A.e.length)return toast('Destroy the guardians first.');if(S.sig<3)return toast('Sigils set: '+S.sig+'/3. Find the rest.');fl.visible=true;flame.intensity=3;S.paused=true;toast('The beacon burns! But the Hush only sinks deeper...',3600);setTimeout(()=>{populate(S.depth+1);S.hp=Math.min(100,S.hp+40);S.oil=100;projs=[];go('gate',true);S.paused=false;const nw=Object.values(WP).filter(w=>w.u==S.depth).map(w=>w.n);toast('DEPTH '+(S.depth+1)+(nw.length?' · New in the armory: '+nw.join(', '):''),4500)},3600);return}
@@ -184,7 +184,7 @@ function shop(){const g=$('sg');g.innerHTML='';$('ss').textContent=S.souls;
 function toggleArm(){if(S.over||S.paused)return;if(!(S.cl.gate&&S.cl.clo))return toast('The armory is sealed. Clear the gatehouse and the cloister first.');
  if(A.name!='arm'){S.ret={n:A.name,x:P.x,z:P.z,y:yaw,p:pit};projs=[];const f=!S.armV;go('arm',true);S.armV=true;if(f)toast('The armory. A sigil rests on the pedestal.');document.exitPointerLock();$('shop').style.display='flex';shop()}
  else{const r=S.ret;go(r.n);P.set(r.x,1.6,r.z);yaw=r.y;pit=r.p;$('shop').style.display='none';R.domElement.requestPointerLock()}}
-addEventListener('keydown',e=>{keys[e.code]=1;if(e.code=='Space')e.preventDefault();if(e.code=='Escape'&&A.name!='arm'&&!S.over&&!S.paused&&$('start').style.display=='none'){S.paused=true;keys={};$('pause').style.display='flex';document.exitPointerLock()}
+addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.code=='KeyC'){e.preventDefault();keys={};document.exitPointerLock();location.reload();return}keys[e.code]=1;if(e.code=='Space')e.preventDefault();if(e.code=='Escape'&&A.name!='arm'&&!S.over&&!S.paused&&$('start').style.display=='none'){S.paused=true;keys={};$('pause').style.display='flex';document.exitPointerLock()}
 if(e.code=='KeyB'||(e.code=='Escape'&&A.name=='arm'))toggleArm();if(!S.over&&!S.paused&&A.name!='arm'){const L=Object.keys(WP).filter(k=>S.own[k]),n=+e.key-1;if(n>=0&&n<L.length&&S.wep!=L[n]){S.wep=L[n];setW();swt=.2}
 if(e.code=='KeyF'){if(S.fl<1)toast('No oil flasks. Find them or buy them in the armory.');else if(S.oil>=99)toast('Your lantern is already full.');else{S.fl--;S.oil=Math.min(100,S.oil+25);toast('Lantern refueled (+25)')}}
 if(e.code=='KeyH'){if(S.sv<1)toast('No healing salves.');else if(S.hp>=99)toast('You are already at full health.');else{S.sv--;S.hp=Math.min(100,S.hp+40);toast('Salve applied (+40)')}}}if(e.code=='KeyE')interact()});
@@ -223,7 +223,7 @@ clo.item('sig',-11,-11);clo.item('oil',10,-11);clo.item('hp',-11,6);clo.item('oi
 function loop(t){requestAnimationFrame(loop);const dt=Math.min(.05,(t-last)/1e3);last=t;
  if(!S.over&&!S.paused){lit=!!(keys.ShiftLeft||keys.ShiftRight)&&S.oil>0&&A.name!='arm';if(lit)S.oil=Math.max(0,S.oil-8*dt);
   let mx=(keys.KeyD?1:0)-(keys.KeyA?1:0),mz=(keys.KeyS?1:0)-(keys.KeyW?1:0);
-  if(mx||mz){const l=Math.hypot(mx,mz),sp=5*dt/l,c=Math.cos(yaw),s=Math.sin(yaw);const dx=(mx*c+mz*s)*sp,dz=(-mx*s+mz*c)*sp;if(!blocked(P.x+dx,P.z))P.x+=dx;if(!blocked(P.x,P.z+dz))P.z+=dz;P.y=1.6+Math.sin(t*.012)*.04}
+  if(mx||mz){const l=Math.hypot(mx,mz),sp=5*dt/l,c=Math.cos(yaw),s=Math.sin(yaw),dx=(mx*c+mz*s)*sp,dz=(-mx*s+mz*c)*sp;const bx=blocked(P.x+dx,P.z),bz=blocked(P.x,P.z+dz);if(bx||bz)stumble=Math.max(stumble,.32);if(!bx)P.x+=dx;if(!bz)P.z+=dz;P.y=1.6+Math.sin(t*.012)*.04;if(lastMx||lastMz){const dot=mx*lastMx+mz*lastMz;if(dot<-.6)stumble=Math.max(stumble,.2)}gaitPhase+=dt*(keys.ShiftLeft||keys.ShiftRight?13:9)*Math.min(1,l);moveLean+=(mx-moveLean)*Math.min(1,dt*9)}else{gaitPhase+=dt*2;moveLean*=Math.max(0,1-dt*5)}lastMx=mx;lastMz=mz;stumble=Math.max(0,stumble-dt);
   P.x=Math.max(-12.7,Math.min(12.7,P.x));P.z=Math.min(13.4,P.z);
   if(P.z<-14.8&&!A.door.o.parent){go(A.name=='gate'?'clo':'tow',true);toast(A.title+(A.name=='tow'?' · the Wraith waits':''),3000)}
   if(P.z<-13.4&&A.door.o.parent)P.z=-13.4;
@@ -231,10 +231,10 @@ function loop(t){requestAnimationFrame(loop);const dt=Math.min(.05,(t-last)/1e3)
   cam.rotation.set(pit,yaw,0);
   lamp.intensity=(lit?2.4:.8)*(S.oil>0?1:.35);lamp.distance=lit?24:14;FL.forEach((q,i)=>{const k=1+Math.sin(t*.02+i*3)*.12+Math.random()*.1;q.l.intensity=1.5*k;q.f.scale.set(1,k,1)});if(A.dust)A.dust.rotation.y+=dt*.03;wtex.offset.set(t*.00003,t*.00002);wat.material.emissiveIntensity=.7+Math.sin(t*.002)*.2;sock.forEach((m,i)=>m.material.emissiveIntensity=i<S.sig?2.5:.1);beam.intensity=lit?5:0;cone.visible=lit;lm.emissiveIntensity=lit?2.2+Math.random()*.4:.7+Math.random()*.15;lan.rotation.z=Math.sin(t*.004)*.05;lamp.color.setHex(lit?0xffb060:0xff8a40);lamp.intensity*=.95+Math.random()*.1;
   swt=Math.max(0,swt-dt);const w=WP[S.wep],swd=Math.max(.2,w.t=='r'?.15:w.cd),q=1-Math.min(1,swt/swd);
-let tx=.32,ty=-.3,tz=-.55,rx=0,ry=0,rz=0;const bob=(mx||mz)?1:0,ph=t*.009;tx+=Math.sin(ph)*.012*bob;ty+=Math.abs(Math.cos(ph))*.015*bob+Math.sin(t*.0018)*.006;
+let tx=.32,ty=-.3,tz=-.55,rx=0,ry=0,rz=0;const bob=(mx||mz)?1:0,ph=gaitPhase;tx+=Math.sin(ph)*.022*bob+Math.sin(t*.0018)*.007;ty+=Math.abs(Math.cos(ph))*.028*bob+Math.sin(t*.0013)*.009;rz-=moveLean*.075*bob;rx+=Math.sin(ph*.5)*.025*bob;
 const dy=Math.max(-.3,Math.min(.3,yaw-ly)),dp=Math.max(-.3,Math.min(.3,pit-lp));ly=yaw;lp=pit;tx-=dy*.6;ty+=dp*.6;ry-=dy*.8;rx+=dp*.5;
 if(swt>0){const u=Math.min(1,Math.max(0,(q-.12)/.58)),ea=1-Math.pow(1-u,3),f=-1+2*ea-(q<.22?Math.sin(q/.22*Math.PI)*.3:0),rec=q>.72?Math.pow((q-.72)/.28,2):0,k=1-rec,ev=Math.sin(q*Math.PI);
-if(w.t=='r'){tz+=ev*.14;rx+=ev*.35}else if(swStyle==0){tx+=-f*.4*k;ry=f*k;rz=f*.5*k}else if(swStyle==1){tx+=(f*.4-.1)*k;ry=-f*k;rz=-f*.5*k}else if(swStyle==2){tx-=.2*k;ty+=-f*.25*k;rx=-f*k}else{tz-=ev*.3;ty+=ev*.1;rx=f*1.1*k;ry=f*2.2*k}}
+if(w.t=='r'){tz+=ev*.14;rx+=ev*.35}else if(swStyle==0){tx+=-f*(.34+swingJitter)*k;ry=f*(.72+swingJitter)*k;rz=f*(.42+swingJitter)*k;rx+=ev*.12}else if(swStyle==1){tx+=(f*(.34-swingJitter)-.1)*k;ry=-f*(.78-swingJitter)*k;rz=-f*(.48+swingJitter)*k;rx+=ev*.08}else if(swStyle==2){tx-=.2*k;ty+=-f*(.22+swingJitter)*k;rx=-f*(.9+swingJitter)*k;ry+=f*.35*k}else{tz-=ev*.3;ty+=ev*.1;rx=f*(1+swingJitter)*k;ry=f*(1.7+swingJitter)*k;rz=-f*.35*k}if(stumble>0){const st=Math.min(1,stumble/.32);tx-=.12*st;ty-=.1*st;rz+=.24*st;rx-=.18*st}}
 const sm=1-Math.exp(-dt*20);PS.x+=(tx-PS.x)*sm;PS.y+=(ty-PS.y)*sm;PS.z+=(tz-PS.z)*sm;PS.rx+=(rx-PS.rx)*sm;PS.ry+=(ry-PS.ry)*sm;PS.rz+=(rz-PS.rz)*sm;wm.position.set(PS.x,PS.y,PS.z);wm.rotation.set(PS.rx,PS.ry,PS.rz);
   for(const p of A.p.slice()){p.o.rotation.y+=dt*2;p.o.position.y=1+Math.sin(t*.003+p.x)*.15;
    if(Math.hypot(P.x-p.o.position.x,P.z-p.o.position.z)<1.8){if(p.t=='oil'){S.fl++;toast('Oil flask stored (press F)')}else if(p.t=='hp'){S.sv++;toast('Healing salve stored (press H)')}else if(p.t=='key'){S.keys++;toast('You found the gate key')}else{S.sig++;toast('Ward sigil ('+S.sig+'/3)')}
