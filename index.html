@@ -1,32 +1,40 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Shen Keep</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ragdoll Archers — Shen Keep</title>
 <style>
-:root{--bg:#07060a;--fg:#e8d9b8;--ac:#ff9a3c;--hp:#c0392b}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:Georgia,'Times New Roman',serif;overflow:hidden}
-canvas{display:block}
-#hud{position:fixed;left:16px;bottom:16px;width:260px;font-size:13px;letter-spacing:.08em;text-shadow:0 1px 3px #000;pointer-events:none}
-.bar{height:10px;background:#1a1612;border:1px solid #5a4a30;margin:3px 0 9px}.bar i{display:block;height:100%;width:100%}
-#obj{position:fixed;top:14px;left:50%;transform:translateX(-50%);font-style:italic;text-shadow:0 1px 4px #000;text-align:center;max-width:80vw}
-#sc{position:fixed;top:14px;right:16px;text-align:right;line-height:1.5}
-#toast{position:fixed;top:30%;left:50%;transform:translateX(-50%);font-size:20px;opacity:0;transition:opacity .4s;text-shadow:0 2px 6px #000;text-align:center}
-#cross{position:fixed;top:50%;left:50%;width:4px;height:4px;margin:-2px;background:#e8d9b8aa;border-radius:50%}
-#vig{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,#000d 100%)}
-#hit{position:fixed;inset:0;pointer-events:none;background:#a00;opacity:0;transition:opacity .25s}
-.ov{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#050408ee;text-align:center;padding:20px}
-.ov h1{font-size:54px;letter-spacing:.25em;margin:0 0 6px;color:var(--ac);font-weight:400}
-.ov p{max-width:560px;line-height:1.6;margin:6px}
-button{font:inherit;color:var(--fg);background:#1d1710;border:1px solid #7a5a2a;padding:9px 18px;cursor:pointer;margin:4px}button:hover:not(:disabled){background:#3a2a14;border-color:var(--ac)}button:disabled{opacity:.4;cursor:default}
-#shop{display:none;background:#0a0710f2}#shop .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;width:min(820px,92vw);margin:14px 0}
-.card{border:1px solid #5a4a30;padding:10px;background:#120e0a}.card b{color:var(--ac)}.card small{display:block;opacity:.7;margin:4px 0 8px}
-#hb{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:6px;pointer-events:none}.sl{min-width:64px;padding:6px 8px;text-align:center;font-size:12px;background:#120e0acc;border:1px solid #5a4a30;text-shadow:0 1px 2px #000}.sl b{display:block;color:var(--ac);font-size:15px}.sl.on{border-color:var(--ac);background:#3a2a14dd;box-shadow:0 0 10px #ff9a3c66}.sl.dim{opacity:.35}
-</style></head><body>
-<div id="hud">HEALTH<div class="bar"><i id="hp" style="background:var(--hp)"></i></div>LANTERN OIL<div class="bar"><i id="oil" style="background:var(--ac)"></i></div><span id="wp"></span></div>
-<div id="obj"></div><div id="hb"></div><div id="sc"></div><div id="toast"></div><div id="cross"></div><div id="vig"></div><div id="hit"></div>
-<div id="start" class="ov"><h1>SHEN KEEP</h1><p>The beacon has gone out and the Hush is climbing from the cellars. You are Mara Voss, warden. You carry the last ember lantern.</p>
-<p><b>WASD</b> move · <b>Mouse</b> look · <b>Space</b> attack · <b>Hold Shift</b> lantern · <b>E</b> interact · <b>1-5</b> switch weapons · <b>F</b> use oil flask · <b>H</b> use salve · <b>B</b> armory (once the gatehouse and cloister are cleared) · <b>Esc</b> pause or quit</p><button id="go">Enter the keep</button></div>
-<div id="shop" class="ov"><h1 style="font-size:36px">THE ARMORY</h1><p>Souls: <b id="ss">0</b> · press <b>B</b> to return to where you were</p><div class="g" id="sg"></div><button id="back">Return (B)</button></div>
-<div id="pause" class="ov" style="display:none"><h1 style="font-size:40px">PAUSED</h1><p>The Hush waits. Nothing moves while you are away.</p><button id="res">Resume</button><button id="quit">Quit to title</button></div>
-<div id="end" class="ov" style="display:none"><h1 id="et"></h1><p id="ep"></p><button onclick="location.reload()">Play again</button></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+:root{color-scheme:dark;--gold:#ffc76a;--ink:#111827}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101827;font-family:system-ui,Segoe UI,sans-serif;color:#fff}
+#game{display:block;width:100vw;height:100vh;touch-action:none;cursor:crosshair}
+#top{position:fixed;top:16px;left:50%;transform:translateX(-50%);width:min(620px,90vw);display:flex;gap:18px;align-items:center;justify-content:center;pointer-events:none}
+.health{width: min(240px,32vw);height:16px;border:2px solid #e8d9bd;background:#222;border-radius:20px;overflow:hidden;box-shadow:0 3px 10px #0008}
+.health i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#e34d52,#ff9a62);transition:width .12s}
+.health.enemy i{background:linear-gradient(90deg,#60c5ed,#367bd6)}
+.name{font-weight:800;font-size:12px;letter-spacing:.12em;text-shadow:0 2px 4px #000}
+#round{font-weight:900;color:var(--gold);font-size:14px;white-space:nowrap;text-shadow:0 2px 5px #000}
+#hint{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);font-size:12px;color:#e7e2d7;text-align:center;text-shadow:0 2px 4px #000;pointer-events:none;width:95%}
+.overlay{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(#07101acc,#07101aeb);padding:22px}
+.panel{max-width:540px;text-align:center;padding:34px 38px;border:1px solid #b88b4d;border-radius:18px;background:linear-gradient(145deg,#29344b,#141c2b);box-shadow:0 24px 80px #0009}
+h1{margin:0;color:#ffd28a;font-size:clamp(34px,7vw,58px);letter-spacing:.04em;text-shadow:0 4px 0 #75451e}
+p{line-height:1.55;color:#e4e6ed}
+button{border:0;border-radius:999px;padding:13px 28px;background:linear-gradient(#ffd98d,#e89a43);color:#35200c;font-weight:900;font-size:16px;cursor:pointer;box-shadow:0 5px 0 #965b29}
+button:hover{filter:brightness(1.08);transform:translateY(-1px)}
+small{color:#bfc8d9}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="top">
+ <div><div class="name">YOU</div><div class="health"><i id="playerHealth"></i></div></div>
+ <div id="round">ROUND 1</div>
+ <div><div class="name" style="text-align:right">RIVAL</div><div class="health enemy"><i id="enemyHealth"></i></div></div>
+</div>
+<div id="hint">A / D move · W jump · Hold mouse to draw · Release to shoot · R restart · Ctrl+C quit</div>
+<div id="start" class="overlay"><div class="panel"><h1>RAGDOLL ARCHERS</h1><p>A physics-powered archery duel. Pull your bow, pick your angle, and knock your rival off balance. Every hit sends the ragdoll tumbling.</p><p><b>Controls</b><br>A / D move · W jump · Hold left mouse to draw · Release to fire</p><button id="play">PLAY</button><p><small>Original game inspired by classic ragdoll archery games</small></p></div></div>
+<div id="end" class="overlay hidden"><div class="panel"><h1 id="result">VICTORY!</h1><p id="resultText">The duel is yours.</p><button id="again">PLAY AGAIN</button><p><small>Press R to restart · Ctrl+C to quit</small></p></div></div>
 <script>
 const T=THREE,$=i=>document.getElementById(i);
 const R=new T.WebGLRenderer({antialias:true});R.setSize(innerWidth,innerHeight);R.setPixelRatio(Math.min(devicePixelRatio,2));R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.5;document.body.prepend(R.domElement);
@@ -269,10 +277,140 @@ const sm=1-Math.exp(-dt*20);PS.x+=(tx-PS.x)*sm;PS.y+=(ty-PS.y)*sm;PS.z+=(tz-PS.z
      if(q.w.spl)A.e.slice().forEach(f=>{if(Math.hypot(f.o.position.x-q.o.position.x,f.o.position.z-q.o.position.z)<q.w.spl)hurt(f,q.w.d*q.m)});else hurt(e,q.w.d*q.m);break}}
    if(hit){if(q.hitE){combo=(combo+1)%4;comboT=1.4}else combo=0;A.g.remove(q.o);projs=projs.filter(x=>x!==q)}}
   if(S.hp<30)$('vig').style.background='radial-gradient(ellipse at center,transparent 30%,#400d 100%)';else $('vig').style.background='';
+(function(){
+"use strict";
+const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
+const $=id=>document.getElementById(id);
+let W=0,H=0,DPR=1,ground=0,active=false,ended=false,round=1,charge=0,charging=false,mouse={x:W/2,y:H/2,down:false},keys={},arrows=[],particles=[],last=0,aiTimer=1.5;
+const gravity=1450;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);canvas.style.width=W+"px";canvas.style.height=H+"px";ctx.setTransform(DPR,0,0,DPR,0,0);ground=H*.82;if(player){player.x=Math.min(player.x,W*.42);rival.x=Math.max(rival.x,W*.65)}}
+function makeFighter(x,color,isPlayer){
+ const f={x,y:ground-110,vx:0,vy:0,color,isPlayer,hp:100,max:100,face:isPlayer?1:-1,grounded:true,recoil:0,stun:0,walk:0,draw:0,alive:true,parts:[]};
+ const specs=[["hip",0,0,10],["chest",0,-43,12],["head",0,-72,10],["shoulder",-13,-48,7],["elbow",-25,-27,6],["hand",-38,-12,5],["shoulder2",13,-48,7],["elbow2",25,-27,6],["hand2",38,-12,5],["knee",-11,26,7],["foot",-17,53,6],["knee2",11,26,7],["foot2",17,53,6]];
+ for(const [name,ox,oy,r] of specs)f.parts.push({name,x:x+ox,y:f.y+oy,px:x+ox,py:f.y+oy,r,ox,oy});
+ return f;
+}
+let player,rival;
+function reset(){ground=H*.82;player=makeFighter(W*.22,"#f3b45d",true);rival=makeFighter(W*.78,"#66b8e9",false);player.y=rival.y=ground-110;arrows=[];particles=[];charge=0;charging=false;ended=false;active=true;aiTimer=1.2;$("end").classList.add("hidden");$("start").classList.add("hidden");updateBars()}
+function point(f,n){return f.parts.find(p=>p.name===n)}
+function link(f,a,b,len,stiff){const p=point(f,a),q=point(f,b);if(!p||!q)return;const dx=q.x-p.x,dy=q.y-p.y,d=Math.hypot(dx,dy)||1,err=(d-len)/d*stiff*.5;p.x+=dx*err;p.y+=dy*err;q.x-=dx*err;q.y-=dy*err}
+function constrain(f){
+ const L=(a,b,l,s=.85)=>link(f,a,b,l,s);
+ L("hip","chest",43);L("chest","head",29);L("chest","shoulder",14);L("shoulder","elbow",24);L("elbow","hand",22);L("chest","shoulder2",14);L("shoulder2","elbow2",24);L("elbow2","hand2",22);L("hip","knee",28);L("knee","foot",28);L("hip","knee2",28);L("knee2","foot2",28);
+ L("shoulder","shoulder2",27,.35);L("knee","knee2",22,.25);
+}
+function updateFighter(f,dt){
+ if(!f.alive)return;
+ f.stun=Math.max(0,f.stun-dt);f.recoil*=Math.pow(.08,dt);f.walk+=dt*Math.abs(f.vx)*.04;
+ const old=f.parts.map(p=>({x:p.x,y:p.y}));
+ for(const p of f.parts){
+  const vx=(p.x-p.px)*.985,vy=(p.y-p.py)*.985;
+  p.px=p.x;p.py=p.y;
+  p.x+=vx;p.y+=vy+gravity*dt*dt;
  }
- $('hp').style.width=Math.max(0,S.hp)+'%';$('oil').style.width=S.oil+'%';$('wp').textContent=(lit?'LANTERN LIT · ':'')+(comboT>0&&combo>0?'COMBO ×'+combo+' · ':'')+WP[S.wep].n.toUpperCase()+(WP[S.wep].t=='r'?' · AMMO '+S.ammo:'');
- $('hb').innerHTML=Object.keys(WP).filter(k=>S.own[k]).map((k,i)=>`<div class="sl${S.wep==k?' on':''}"><b>${i+1}</b>${WP[k].n}</div>`).join('')+`<div class="sl${S.fl?'':' dim'}"><b>F</b>Oil ×${S.fl}</div><div class="sl${S.sv?'':' dim'}"><b>H</b>Salve ×${S.sv}</div>`;
- $('sc').innerHTML='DEPTH '+(S.depth+1)+'<br>SOULS '+S.souls+'<br>SIGILS '+S.sig+'/3<br>KEYS '+S.keys;$('obj').textContent=obj();
- R.render(sc,cam)}
-requestAnimationFrame(loop);
-</script></body></html>
+ const hip=point(f,"hip"),ch=point(f,"chest"),head=point(f,"head");
+ const move=f.isPlayer?((keys.KeyD||keys.ArrowRight)?1:0)-((keys.KeyA||keys.ArrowLeft)?1:0):0;
+ if(f.stun<=0){
+  f.vx+=(move*950-f.vx*5)*dt;
+  if(f.isPlayer&&keys.KeyW&&f.grounded){f.vy=-520;f.grounded=false}
+  if(!f.isPlayer){f.vx+=(f.x>W*.63?-100:100)*dt}
+ }
+ f.x+=f.vx*dt;f.x=Math.max(36,Math.min(W-36,f.x));
+ if(f.grounded&&Math.abs(f.vx)>8){const swing=Math.sin(f.walk)*12;point(f,"knee").x+=swing;point(f,"knee2").x-=swing;point(f,"elbow").x-=swing*.35;point(f,"elbow2").x+=swing*.35}
+ if(f.recoil){ch.x+=f.recoil*dt;head.x+=f.recoil*dt*.8}
+ for(let i=0;i<7;i++)constrain(f);
+ let minY=0;f.grounded=false;
+ for(const p of f.parts){if(p.y+p.r>ground){p.y=ground-p.r;p.py=p.y+(p.y-p.py)*.2;if(p.name==="foot"||p.name==="foot2"||p.name==="hip")f.grounded=true}}
+ const avg=point(f,"hip");f.y=avg.y;
+ f.vy=0;
+ for(let i=0;i<f.parts.length;i++){const p=f.parts[i],o=old[i];if(p.y>ground-p.r-.5)f.grounded=true}
+}
+function aimPoint(){const hand=point(player,"hand2");return{x:hand.x,y:hand.y}}
+function drawBow(f,angle,power,isPlayer){
+ const hand=point(f,"hand2"),shoulder=point(f,"shoulder2"),face=f.face;
+ const bowX=hand.x+face*13,bowY=hand.y-5,curve=power*13;
+ ctx.save();ctx.lineCap="round";ctx.strokeStyle="#8c5529";ctx.lineWidth=5;
+ ctx.beginPath();ctx.moveTo(bowX-face*18,bowY-29);ctx.quadraticCurveTo(bowX+face*(16+curve),bowY,bowX-face*18,bowY+29);ctx.stroke();
+ ctx.strokeStyle="#f4dfb4";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(bowX-face*18,bowY-29);ctx.lineTo(bowX-face*18+face*power*8,bowY);ctx.lineTo(bowX-face*18,bowY+29);ctx.stroke();
+ if(isPlayer&&charging){const a=angle;ctx.strokeStyle="#f5d9a4";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(hand.x,hand.y);ctx.lineTo(hand.x-Math.cos(a)*power*20,hand.y-Math.sin(a)*power*20);ctx.stroke()}
+ ctx.restore();
+}
+function drawFighter(f){
+ const get=n=>point(f,n),head=get("head"),ch=get("chest"),hip=get("hip");
+ ctx.save();ctx.lineCap="round";ctx.lineJoin="round";
+ function limb(a,b,w,color){const p=get(a),q=get(b);ctx.strokeStyle="#2b2930";ctx.lineWidth=w+3;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();ctx.strokeStyle=color;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,w*.48,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(q.x,q.y,w*.48,0,Math.PI*2);ctx.fill()}
+ limb("hip","knee",10,f.color);limb("knee","foot",8,"#403d45");limb("hip","knee2",10,f.color);limb("knee2","foot2",8,"#403d45");
+ limb("chest","shoulder",10,f.color);limb("shoulder","elbow",8,f.color);limb("elbow","hand",7,"#e8b88a");
+ limb("chest","shoulder2",10,f.color);limb("shoulder2","elbow2",8,f.color);limb("elbow2","hand2",7,"#e8b88a");
+ ctx.fillStyle=f.color;ctx.strokeStyle="#29252c";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(ch.x,ch.y,13,19,.08,0,Math.PI*2);ctx.fill();ctx.stroke();
+ ctx.fillStyle="#f0c49a";ctx.beginPath();ctx.arc(head.x,head.y,head.r,0,Math.PI*2);ctx.fill();ctx.stroke();
+ ctx.fillStyle="#302b30";ctx.beginPath();ctx.arc(head.x+f.face*3,head.y-1,2,0,Math.PI*2);ctx.fill();
+ const aim=f.isPlayer?Math.atan2(mouse.y-get("hand2").y,mouse.x-get("hand2").x):Math.PI+.15;
+ drawBow(f,aim,f.isPlayer?charge:0,f.isPlayer);
+ ctx.restore();
+}
+function fire(f,angle,power){
+ const h=point(f,"hand2"),speed=520+power*550;
+ arrows.push({x:h.x,y:h.y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,owner:f,life:4,hit:false});
+ for(let i=0;i<5;i++)particles.push({x:h.x,y:h.y,vx:(Math.random()-.5)*70,vy:(Math.random()-.5)*70,life:.25,color:"#f5d6a0"});
+}
+function hitTest(a,f){
+ for(const p of f.parts){const d=Math.hypot(a.x-p.x,a.y-p.y);if(d<p.r+5)return p}
+ return null;
+}
+function damage(f,part,arrow){
+ const d=part.name==="head"?30:part.name==="chest"||part.name==="hip"?22:14;
+ f.hp=Math.max(0,f.hp-d);f.stun=.24;f.recoil=arrow.vx*.2;
+ const dx=arrow.vx*.025,dy=arrow.vy*.025;part.px-=dx;part.py-=dy;
+ for(let i=0;i<12;i++)particles.push({x:arrow.x,y:arrow.y,vx:(Math.random()-.5)*180,vy:-Math.random()*150,life:.5,color:f.color});
+ updateBars();
+ if(f.hp<=0){f.alive=false;finish(f===rival)}
+}
+function updateBars(){$("playerHealth").style.width=player?player.hp+"%":"100%";$("enemyHealth").style.width=rival?rival.hp+"%":"100%";$("round").textContent="ROUND "+round}
+function finish(win){if(ended)return;ended=true;active=false;$("result").textContent=win?"VICTORY!":"DEFEAT";$("resultText").textContent=win?"Your rival has been sent flying. Ready for another duel?":"Your archer has fallen. Adjust your aim and try again.";$("end").classList.remove("hidden")}
+function update(dt){
+ if(!active||ended)return;
+ updateFighter(player,dt);updateFighter(rival,dt);
+ if(charging)charge=Math.min(1,charge+dt*.75);
+ aiTimer-=dt;
+ if(aiTimer<=0&&rival.alive){
+  const p=point(rival,"hand2"),target=point(player,"chest");
+  const dx=target.x-p.x,dy=target.y-p.y;
+  const dist=Math.hypot(dx,dy),flight=dist/760,angle=Math.atan2(dy+gravity*flight*flight*.5,dx);
+  fire(rival,angle,.55+Math.random()*.35);aiTimer=1.45+Math.random()*1.2;
+ }
+ for(const a of arrows){
+  a.life-=dt;a.vy+=gravity*dt;a.x+=a.vx*dt;a.y+=a.vy*dt;
+  if(a.owner!==player){const part=hitTest(a,player);if(part){damage(player,part,a);a.hit=true}}
+  else{const part=hitTest(a,rival);if(part){damage(rival,part,a);a.hit=true}}
+  if(a.y>ground-3||a.x<0||a.x>W||a.life<=0)a.hit=true;
+ }
+ arrows=arrows.filter(a=>!a.hit);
+ for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=gravity*.25*dt;p.life-=dt}
+ particles=particles.filter(p=>p.life>0);
+}
+function draw(){
+ ctx.clearRect(0,0,W,H);
+ const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,"#172b4a");sky.addColorStop(.62,"#7893a8");sky.addColorStop(1,"#e6b77b");ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+ ctx.fillStyle="#f8d99b";ctx.beginPath();ctx.arc(W*.78,H*.18,42,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#32465a";ctx.beginPath();ctx.moveTo(0,ground);for(let x=0;x<=W;x+=80)ctx.lineTo(x,ground-55-Math.sin(x*.009)*22);ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.fill();
+ ctx.fillStyle="#493a35";ctx.fillRect(0,ground,W,H-ground);ctx.fillStyle="#806047";ctx.fillRect(0,ground,W,8);
+ for(let x=20;x<W;x+=46){ctx.fillStyle="#ad8358";ctx.fillRect(x,ground+20,25,3)}
+ drawFighter(player);drawFighter(rival);
+ for(const a of arrows){ctx.save();ctx.translate(a.x,a.y);ctx.rotate(Math.atan2(a.vy,a.vx));ctx.strokeStyle="#f3e2bf";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-22,0);ctx.lineTo(8,0);ctx.stroke();ctx.fillStyle="#b5b8c4";ctx.beginPath();ctx.moveTo(12,0);ctx.lineTo(3,-5);ctx.lineTo(3,5);ctx.fill();ctx.fillStyle="#d86c54";ctx.beginPath();ctx.moveTo(-20,0);ctx.lineTo(-27,-5);ctx.lineTo(-24,0);ctx.lineTo(-27,5);ctx.fill();ctx.restore()}
+ for(const p of particles){ctx.globalAlpha=Math.max(0,p.life*2);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}
+ if(active&&charging){const h=point(player,"hand2"),a=Math.atan2(mouse.y-h.y,mouse.x-h.x);ctx.strokeStyle="#ffe2a2";ctx.globalAlpha=.3+.6*charge;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(h.x,h.y);ctx.lineTo(h.x+Math.cos(a)*100,h.y+Math.sin(a)*100);ctx.stroke();ctx.globalAlpha=1}
+}
+function frame(t){const dt=Math.min(.033,(t-last)/1000||0);last=t;update(dt);draw();requestAnimationFrame(frame)}
+function coords(e){const r=canvas.getBoundingClientRect();mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top}
+canvas.addEventListener("pointermove",coords);
+canvas.addEventListener("pointerdown",e=>{coords(e);if(active&&!ended){charging=true;charge=.08;mouse.down=true;canvas.setPointerCapture(e.pointerId)}});
+canvas.addEventListener("pointerup",e=>{coords(e);if(charging&&active&&!ended){const h=point(player,"hand2"),angle=Math.atan2(mouse.y-h.y,mouse.x-h.x);fire(player,angle,Math.max(.18,charge))}charging=false;charge=0;mouse.down=false});
+addEventListener("keydown",e=>{keys[e.code]=true;if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code))e.preventDefault();if(e.code==="KeyR"&&active===false)reset();if((e.ctrlKey||e.metaKey)&&e.code==="KeyC"){e.preventDefault();active=false;ended=true;$("end").classList.remove("hidden");$("result").textContent="GAME STOPPED";$("resultText").textContent="The game has been stopped. Refresh the page to play again."}});
+addEventListener("keyup",e=>keys[e.code]=false);
+$("play").onclick=()=>{round=1;reset()};$("again").onclick=()=>{round++;reset()};
+addEventListener("resize",resize);resize();reset();active=false;$("start").classList.remove("hidden");requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
